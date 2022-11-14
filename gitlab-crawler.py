@@ -134,7 +134,7 @@ def gen_datapoint(kpi_type, kpi_data, i):
         }]
         return data_point
     else:
-        return 0
+        logging.warning("kpi_type is not matching!")
 
 
 def push_data(kpi_type, kpi_data):
