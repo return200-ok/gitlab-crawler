@@ -2,8 +2,8 @@ import os
 from os import environ
 from time import time
 import json
-import requests
-from datetime import datetime
+import logging
+from datetime import datetime, timedelta
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import ASYNCHRONOUS
 import gitlab
@@ -12,6 +12,10 @@ influx_token = "KlXfBqa0uSGs0icfE-3g8FsQAoC9hx_QeDsxE3pn0p9wWWLn0bzDZdSmrOijoTA_
 influx_server = "http://192.168.3.101:8086"
 org_name = "org"
 bucket_name = "gitlab"
+duration_time = datetime.now() - timedelta(days = 7)
+log_file = str(duration_time)+'gitlab_collecter.log'
+logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
+
 
 
 #List projects
@@ -21,23 +25,25 @@ def get_projects():
 
 #Get the list of branches for a repository
 def get_branches(project):
-    branches = project.branches.list()
+    branches = project.branches.list(created_after=duration_time)
     return branches
 
 #List the commits for a project
 def get_commits(project):
-    commits = project.commits.list()
+    commits = project.commits.list(created_after=duration_time)
     return commits
 
 #List the project issues
 def get_issues(project):
-    issues = project.issues.list()
+    issues = project.issues.list(created_after=duration_time)
     return issues
 
 #List MRs/Pull-request for a project
 def get_mrs(project):
-    mrs = project.mergerequests.list()
+    mrs = project.mergerequests.list(created_after=duration_time)
     return mrs
+
+
 
 #Create Commits object
 class Commits:
@@ -70,100 +76,92 @@ class Mrs:
         self.target_branch = target_branch
         self.source_branch = source_branch
 
-#
-def push_commit():
+#Gen data point
+def gen_datapoint(kpi_type, kpi_data, i):
+    if kpi_type == "mrs":
+        data = Mrs(kpi_data[i].id, kpi_data[i].project_id, kpi_data[i].title, kpi_data[i].state, kpi_data[i].created_at, kpi_data[i].updated_at, kpi_data[i].target_branch, kpi_data[i].source_branch)
+        data_point = [{
+            "measurement": project.id,
+            "tags": {
+            "project_name": project.name,
+            "mrs_id": data.id,
+            "mrs_title": data.title,
+            "state": data.state,
+            "created_at": data.created_at,
+            "updated_at": data.updated_at,
+            "target_branch": data.target_branch,
+            "source_branch": data.source_branch,
+            },
+            "time": int(time()) * 1000000000,
+            "fields": {
+            "mrs_id": data.id
+            }
+        }]
+        return data_point
+    elif kpi_type == "issue":
+        data = Issues(kpi_data[i].id, kpi_data[i].project_id, kpi_data[i].title, kpi_data[i].state, kpi_data[i].created_at, kpi_data[i].updated_at)
+        data_point = [{
+            "measurement": data.project_id,
+            "tags": {
+            "project_name": project.name,
+            "issue_id": data.id,
+            "issue_title": data.title,
+            "issue_state": data.state,
+            "created_at": data.created_at,
+            "updated_at": data.updated_at,
+            },
+            "time": int(time()) * 1000000000,
+            "fields": {
+            "issue_id": data.id
+            }
+        }]
+        return data_point
+    elif kpi_type == "commit":
+        data = Commits(kpi_data[i].id, kpi_data[i].short_id, kpi_data[i].title, kpi_data[i].created_at, kpi_data[i].author_email)
+        data_point = [{
+            "measurement": project.id,
+            "tags": {
+            "project_name": project.name,
+            "commit_id": data.id,
+            "commit_title": data.title,
+            "created_at": data.created_at,
+            "author_email": data.author_email,
+            },
+            "time": int(time()) * 1000000000,
+            "fields": {
+            "commit_id": data.short_id
+            }
+        }]
+        return data_point
+    else:
+        return 0
+
+
+def push_data(kpi_type, kpi_data):
+    if len(kpi_data) > 0: 
+        for i in range(0, len(kpi_data)):
+            with InfluxDBClient(url=influx_server, token=influx_token, org=org_name) as client: 
+                data_point = gen_datapoint(kpi_type, kpi_data, i)
+                try: 
+                    client.write_api(write_options=ASYNCHRONOUS).write(bucket_name, org_name, data_point)
+                    logging.info("write "+str(data_point)+" to bucket "+bucket_name)
+                except Exception as e:
+                    logging.exception(e)
+
+if __name__ == '__main__':
     projects = get_projects()
-    for project in projects:
-        commit = get_commits(project)
-        #Check if project has no commit
-        if len(commit) > 0: 
-            for com in range(0, len(commit)):
-                data = Commits(commit[com].id, commit[com].short_id, commit[com].title, commit[com].created_at, commit[com].author_email)
-                with InfluxDBClient(url=influx_server, token=influx_token, org=org_name) as client: 
-                    data_point = [{
-                        "measurement": project.id,
-                        "tags": {
-                        "project_name": project.name,
-                        "commit_id": data.id,
-                        "commit_title": data.title,
-                        "created_at": data.created_at,
-                        "author_email": data.author_email,
-                        },
-                        "time": int(time()) * 1000000000,
-                        "fields": {
-                        "short_id": data.short_id
-                        }
-                    }]
-
-                    try: 
-                        client.write_api(write_options=ASYNCHRONOUS).write(bucket_name, org_name, data_point)
-                        print ("write ", data_point," to bucket "+bucket_name)
-                    except Exception as e:
-                        print(e)
-
-
-def push_issue():
-    projects = get_projects()
-    for project in projects:
-        issue = get_issues(project)
-        #Check if project has no issue
-        if len(issue) > 0: 
-            for isu in range(0, len(issue)):
-                data = Issues(issue[isu].id, issue[isu].project_id, issue[isu].title, issue[isu].state, issue[isu].created_at, issue[isu].updated_at)
-                with InfluxDBClient(url=influx_server, token=influx_token, org=org_name) as client: 
-                    data_point = [{
-                        "measurement": data.project_id,
-                        "tags": {
-                        "project_name": project.name,
-                        "issue_id": data.id,
-                        "issue_title": data.title,
-                        "issue_state": data.state,
-                        "created_at": data.created_at,
-                        "updated_at": data.updated_at,
-                        },
-                        "time": int(time()) * 1000000000,
-                        "fields": {
-                        "issue_id": data.id
-                        }
-                    }]
-
-                    try: 
-                        client.write_api(write_options=ASYNCHRONOUS).write(bucket_name, org_name, data_point)
-                        print ("write ", data_point," to bucket "+bucket_name)
-                    except Exception as e:
-                        print(e)
-
-
-def push_mrs():
-    projects = get_projects()
-    for project in projects:
-        mrs = get_mrs(project)
-        #Check if project has no mrs
-        if len(mrs) > 0: 
-            for m in range(0, len(mrs)):
-                data = Mrs(mrs[m].id, mrs[m].project_id, mrs[m].title, mrs[m].state, mrs[m].created_at, mrs[m].updated_at, mrs[m].target_branch, mrs[m].source_branch)
-                with InfluxDBClient(url=influx_server, token=influx_token, org=org_name) as client: 
-                    data_point = [{
-                        "measurement": project.id,
-                        "tags": {
-                        "project_name": project.name,
-                        "mrs_id": data.id,
-                        "mrs_title": data.title,
-                        "state": data.state,
-                        "created_at": data.created_at,
-                        "updated_at": data.updated_at,
-                        "target_branch": data.target_branch,
-                        "source_branch": data.source_branch,
-                        },
-                        "time": int(time()) * 1000000000,
-                        "fields": {
-                        "mrs_id": data.id
-                        }
-                    }]
-
-                    try: 
-                        client.write_api(write_options=ASYNCHRONOUS).write(bucket_name, org_name, data_point)
-                        print ("write ", data_point," to bucket "+bucket_name)
-                    except Exception as e:
-                        print(e)
+    kpis = ["mrs","issue","commit"]
+    for kpi in kpis:
+        if kpi == "mrs":
+            for project in projects:
+                mrs = get_mrs(project)
+                push_data(kpi, mrs)
+        elif kpi == "issue":
+            for project in projects:
+                issue = get_issues(project)
+                push_data(kpi, issue)
+        elif kpi == "commit":
+            for project in projects:
+                commit = get_commits(project)
+                push_data(kpi, commit)
 
