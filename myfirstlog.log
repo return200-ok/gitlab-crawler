@@ -1,8 +1,0 @@
-2022-11-14 11:04:15,631 | root | INFO | I'm an informational message.
-2022-11-14 11:04:15,633 | root | DEBUG | I'm a message for debugging purposes.
-2022-11-14 11:04:15,633 | root | WARNING | I'm a warning. Beware!
-2022-11-14 11:08:51,855 | root | INFO | I'm an informational message.
-2022-11-14 11:08:51,855 | root | DEBUG | I'm a message for debugging purposes.
-2022-11-14 11:08:51,855 | root | WARNING | I'm a warning. Beware!
-2022-11-14 11:08:51,855 | root | ERROR | This is error.
-2022-11-14 11:08:51,855 | root | CRITICAL | This is critical.

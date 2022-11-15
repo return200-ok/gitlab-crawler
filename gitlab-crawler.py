@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 from os import environ
 from time import time
 import json
@@ -7,19 +8,26 @@ from datetime import datetime, timedelta
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import ASYNCHRONOUS
 import gitlab
-gl = gitlab.Gitlab(url='http://192.168.3.56:8098', private_token='UJFWJWcxvWciPuQDugxu')
-influx_token = "KlXfBqa0uSGs0icfE-3g8FsQAoC9hx_QeDsxE3pn0p9wWWLn0bzDZdSmrOijoTA_Tr2MGPnF-LxZl-Nje8YJGQ=="
-influx_server = "http://192.168.3.101:8086"
-org_name = "org"
-bucket_name = "gitlab"
-before_day = 7
+import rfc3339
+
+# Load env
+load_dotenv()
+gl = gitlab.Gitlab(url=os.getenv('GITLAB_URL'), private_token=os.getenv('GITLAB_PRIVATE_TOKEN'))
+influx_token = os.getenv('INFLUX_TOKEN')
+influx_server = os.getenv('INFLUX_DB')
+org_name = os.getenv('INFLUX_ORG')
+bucket_name = os.getenv('BUCKET_NAME')
+before_day = float(os.getenv('BEFORE_DAY'))
+
+def get_date_string(date_object):
+  return rfc3339.rfc3339(date_object)
+
 duration_time = datetime.now() - timedelta(before_day)
-log_file = str(duration_time)+'gitlab_collecter.log'
+log_file = get_date_string(datetime.now())+'_gitlab_collecter.log'
 logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
 
-
-#List projects
+# List projects
 def get_projects():
     projects = gl.projects.list()
     return projects
@@ -43,8 +51,6 @@ def get_issues(project):
 def get_mrs(project):
     mrs = project.mergerequests.list(created_after=duration_time)
     return mrs
-
-
 
 #Create Commits object
 class Commits:
