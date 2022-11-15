@@ -12,7 +12,8 @@ influx_token = "KlXfBqa0uSGs0icfE-3g8FsQAoC9hx_QeDsxE3pn0p9wWWLn0bzDZdSmrOijoTA_
 influx_server = "http://192.168.3.101:8086"
 org_name = "org"
 bucket_name = "gitlab"
-duration_time = datetime.now() - timedelta(days = 7)
+before_day = 7
+duration_time = datetime.now() - timedelta(before_day)
 log_file = str(duration_time)+'gitlab_collecter.log'
 logging.basicConfig(filename=log_file, level=logging.DEBUG, format='%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 
