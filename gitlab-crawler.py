@@ -1,14 +1,16 @@
-import os
-from dotenv import load_dotenv
-from os import environ
-from time import time
 import json
 import logging
+import os
 from datetime import datetime, timedelta
+from os import environ
+from time import time
+
+import rfc3339
+from dotenv import load_dotenv
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import ASYNCHRONOUS
+
 import gitlab
-import rfc3339
 
 # Load env
 load_dotenv()
