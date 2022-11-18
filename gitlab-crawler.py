@@ -153,9 +153,10 @@ def push_data(kpi_type, kpi_data):
                 data_point = gen_datapoint(kpi_type, kpi_data, i)
                 try: 
                     client.write_api(write_options=ASYNCHRONOUS).write(bucket_name, org_name, data_point)
-                    logging.info("write "+str(data_point)+" to bucket "+bucket_name)
+                    logging.info("Wrote "+str(data_point)+" to bucket "+bucket_name)
                 except Exception as e:
-                    logging.exception(e)
+                    logging.error("Problem inserting points for current batch")
+                    raise e
 
 if __name__ == '__main__':
     projects = get_projects()
