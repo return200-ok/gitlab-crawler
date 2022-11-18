@@ -1,4 +1,4 @@
-# sonarqube-collector
+# Gitlab-collector
 ## Install requirement <br>
 ```
 pip install -r /path/to/requirements.txt
