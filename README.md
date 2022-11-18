@@ -13,7 +13,7 @@ INFLUX_ORG = "org"
 BUCKET_NAME = "gitlab"
 BEFORE_DAY = 7
 ```
-## Run collector to collect data from sonarqube and put to influxdb
+## Run collector to collect data from sonarqube and put them to influxdb
 ```
 python3 gitlab-crawler.py
 ...
