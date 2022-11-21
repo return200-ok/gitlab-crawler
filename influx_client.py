@@ -88,13 +88,17 @@ class InfluxClient:
         except ApiException as e:
             # bucket does not exist
             if e.status == 404:
-                logging.exception("The specified bucket does not exist.")
-                raise Exception(f"The specified bucket does not exist.") from e
+                message = 'The specified bucket does not exist.'
+                logging.exception(message)
+                raise Exception(f"{message}") from e
             # insufficient permissions
             if e.status == 403:
-                raise Exception(f"The specified token does not have sufficient credentials to write to '{self._bucket}'.") from e
+                message = "The specified token does not have sufficient credentials to write to "+self._bucket+"."
+                logging.exception(message)
+                raise Exception(f"{message}") from e
             # 400 (BadRequest) caused by empty LineProtocol
             if e.status != 400:
+                logging.exception(e)
                 raise
         print("ok")
 

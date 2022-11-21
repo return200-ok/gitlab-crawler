@@ -48,6 +48,11 @@ def get_projects():
     projects = gl.projects.list(get_all=True)
     return projects
 
+def get_project_size(project):
+    project_id = project.id
+    project_size = gl.projects.get(id=project_id,statistics=True)
+    return project_size
+
 #Get the list of branches for a repository
 def get_branches(project):
     branches = project.branches.list(created_after=duration_time)
@@ -67,6 +72,10 @@ def get_issues(project):
 def get_mrs(project):
     mrs = project.mergerequests.list(created_after=duration_time)
     return mrs
+
+class Stats:
+    def __init__(self, statistics):
+        self.statistics = statistics
 
 #Create Commits object
 class Commits:
@@ -153,6 +162,16 @@ def gen_datapoint(kpi_type, kpi_data, i):
             }
         data_point = InfluxPoint(measurement, tags, fields, timestamp)._point
         return data_point
+    elif kpi_type == "statistics":
+        data = Stats(kpi_data[i].statistics)
+        measurement = project.id
+        tags = data.statistics
+        timestamp = int(time())
+        fields = {
+            "project_id": project.id
+            }
+        data_point = InfluxPoint(measurement, tags, fields, timestamp)._point
+        return data_point
     else:
         logging.warning("kpi_type is not matching!")
 
@@ -185,7 +204,7 @@ def push_data_to_influx(kpi, data):
 
 if __name__ == '__main__':
     projects = get_projects()
-    kpis = ["mrs","issue","commit"]
+    kpis = ["mrs", "issue", "commit", "statistics"]
     for kpi in kpis:
         if kpi == "mrs":
             for project in projects:
@@ -199,4 +218,9 @@ if __name__ == '__main__':
             for project in projects:
                 commit = get_commits(project)
                 push_data_to_influx(kpi, commit)
+        elif kpi == "statistics":
+            for project in projects:
+                statistics = []
+                statistics.append(get_project_size(project))
+                push_data_to_influx(kpi, statistics)
 
