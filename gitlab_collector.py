@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import sys
 from datetime import datetime, timedelta
 from os import environ
 from time import time
@@ -24,7 +25,6 @@ bucket_name = os.getenv('BUCKET_NAME')
 before_day = float(os.getenv('BEFORE_DAY'))
 
 
-
 '''
     Config logging handler
 '''
@@ -38,13 +38,17 @@ logPath = "logs"
 fileName = get_date_string(datetime.now())+'_gitlab_collecter'
 fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, fileName))
 fileHandler.setFormatter(logFormatter)
+'''
+Avoid duplicated logs
+'''
+if (rootLogger.hasHandlers()):
+    rootLogger.handlers.clear()
 rootLogger.addHandler(fileHandler)
 
-consoleHandler = logging.StreamHandler()
+consoleHandler = logging.StreamHandler(sys.stdout)
 consoleHandler.setFormatter(logFormatter)
 rootLogger.addHandler(consoleHandler)
 logging.getLogger().setLevel(logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 # List projects
 '''
@@ -187,13 +191,10 @@ def gen_datapoint(kpi_type, kpi_data, i):
 
 
 def push_data(kpi, data):
-    client.check_connection()
-    client.check_write()
     if len(data) > 0:
         for i in range(0, len(data)):
             data_point = gen_datapoint(kpi, data, i)
             try:
-                # client.write_data(data_point)
                 write_multiprocess(data_point)
                 logging.info("Wrote "+str(data_point)+" to bucket "+bucket_name)
             except Exception as e:
@@ -202,6 +203,10 @@ def push_data(kpi, data):
 
 if __name__ == '__main__':
     client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
+    '''Check connection & write'''
+    client.check_connection()
+    client.check_write()
+    '''Get list project & kpis'''
     projects = get_projects()
     kpis = ["mrs", "issue", "commit", "statistics"]
     start_time = datetime.now()

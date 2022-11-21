@@ -43,7 +43,6 @@ class InfluxDBWriter(multiprocessing.Process):
 
     def terminate(self) -> None:
         proc_name = self.name
-        logging.info()
         logging.info('Writer: flushing data...')
         self.write_api.close()
         self.client.close()
