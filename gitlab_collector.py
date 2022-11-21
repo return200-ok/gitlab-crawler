@@ -23,18 +23,27 @@ org_name = os.getenv('INFLUX_ORG')
 bucket_name = os.getenv('BUCKET_NAME')
 before_day = float(os.getenv('BEFORE_DAY'))
 
+
+
+'''
+    Config logging handler
+'''
 def get_date_string(date_object):
   return rfc3339.rfc3339(date_object)
 
 duration_time = datetime.now() - timedelta(before_day)
-log_file = get_date_string(datetime.now())+'_gitlab_collecter.log'
-# instantiate a logger object 
-logging.basicConfig(
-  format='%(asctime)s | %(name)s | %(levelname)s | %(message)s',
-  datefmt='%Y-%m-%d:%H:%M:%S',
-  level=logging.DEBUG,
-  filename='logs/'+log_file
-)
+logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+rootLogger = logging.getLogger()
+logPath = "logs"
+fileName = get_date_string(datetime.now())+'_gitlab_collecter'
+fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, fileName))
+fileHandler.setFormatter(logFormatter)
+rootLogger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+rootLogger.addHandler(consoleHandler)
+logging.getLogger().setLevel(logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # List projects
@@ -177,19 +186,7 @@ def gen_datapoint(kpi_type, kpi_data, i):
         logging.warning("kpi_type is not matching!")
 
 
-# def push_data(kpi_type, kpi_data):
-#     if len(kpi_data) > 0: 
-#         for i in range(0, len(kpi_data)):
-#             with InfluxDBClient(url=influx_server, token=influx_token, org=org_name) as client: 
-#                 data_point = gen_datapoint(kpi_type, kpi_data, i)
-#                 try: 
-#                     client.write_api(write_options=ASYNCHRONOUS).write(bucket_name, org_name, data_point)
-#                     logging.info("Wrote "+str(data_point)+" to bucket "+bucket_name)
-#                 except Exception as e:
-#                     logging.error("Problem inserting points for current batch")
-#                     raise e
-
-def push_data_to_influx(kpi, data):
+def push_data(kpi, data):
     client.check_connection()
     client.check_write()
     if len(data) > 0:
@@ -212,22 +209,22 @@ if __name__ == '__main__':
         if kpi == "mrs":
             for project in projects:
                 mrs = get_mrs(project)
-                push_data_to_influx(kpi, mrs)
+                push_data(kpi, mrs)
         elif kpi == "issue":
             for project in projects:
                 issue = get_issues(project)
-                push_data_to_influx(kpi, issue)
+                push_data(kpi, issue)
         elif kpi == "commit":
             for project in projects:
                 commit = get_commits(project)
-                push_data_to_influx(kpi, commit)
+                push_data(kpi, commit)
         elif kpi == "statistics":
             for project in projects:
                 statistics = []
                 statistics.append(get_project_size(project))
-                push_data_to_influx(kpi, statistics)
+                push_data(kpi, statistics)
 
     print()
-    print(f'Import finished in: {datetime.now() - start_time}')
+    logging.info(f'Import finished in: {datetime.now() - start_time}')
     print()
     client.close_process()

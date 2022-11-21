@@ -1,5 +1,6 @@
 import concurrent.futures
 import io
+import logging
 import multiprocessing
 import os
 from collections import OrderedDict
@@ -15,24 +16,7 @@ from influxdb_client import InfluxDBClient, Point, WriteOptions
 from influxdb_client.client.write_api import WriteType
 from reactivex import operators as ops
 
-influx_token = os.getenv('INFLUX_TOKEN')
-influx_server = os.getenv('INFLUX_DB')
-org_name = os.getenv('INFLUX_ORG')
-bucket_name = os.getenv('BUCKET_NAME')
-
-class ProgressTextIOWrapper(io.TextIOWrapper):
-    """
-    TextIOWrapper that store progress of read.
-    """
-    def __init__(self, *args, **kwargs):
-        io.TextIOWrapper.__init__(self, *args, **kwargs)
-        self.progress = None
-        pass
-
-    def readline(self, *args, **kwarg) -> str:
-        readline = super().readline(*args, **kwarg)
-        self.progress.value += len(readline)
-        return readline
+logger = logging.getLogger(__name__)
 
 
 class InfluxDBWriter(multiprocessing.Process):
@@ -59,11 +43,11 @@ class InfluxDBWriter(multiprocessing.Process):
 
     def terminate(self) -> None:
         proc_name = self.name
-        print()
-        print('Writer: flushing data...')
+        logging.info()
+        logging.info('Writer: flushing data...')
         self.write_api.close()
         self.client.close()
-        print('Writer: closed'.format(proc_name))
+        logging.info('Writer: closed'.format(proc_name))
 
 def init_counter(counter, progress, queue):
     """
@@ -110,34 +94,3 @@ def write_multiprocess(data_point):
     queue_.put(None)
     queue_.join()
 
-    
-
-    # """
-    # Querying 10 pickups from dispatching 'B00008'
-    # """
-    # query = 'from(bucket:"my-bucket")' \
-    #         '|> range(start: 2019-01-01T00:00:00Z, stop: now()) ' \
-    #         '|> filter(fn: (r) => r._measurement == "taxi-trip-data")' \
-    #         '|> filter(fn: (r) => r.dispatching_base_num == "B00008")' \
-    #         '|> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")' \
-    #         '|> rename(columns: {_time: "pickup_datetime"})' \
-    #         '|> drop(columns: ["_start", "_stop"])|> limit(n:10, offset: 0)'
-
-    # client = InfluxDBClient(url=influx_server, token=influx_token, org=org_name)
-    # result = client.query_api().query(query=query)
-
-    # """
-    # Processing results
-    # """
-    # print()
-    # print("=== Querying 10 pickups from dispatching 'B00008' ===")
-    # print()
-    # for table in result:
-    #     for record in table.records:
-    #         print(
-    #             f'Dispatching: {record["dispatching_base_num"]} pickup: {record["pickup_datetime"]} dropoff: {record["dropoff_datetime"]}')
-
-    """
-    Close client
-    """
-    # client.close()
