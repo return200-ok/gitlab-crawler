@@ -81,9 +81,6 @@ def init_counter(counter, progress, queue):
     global queue_
     queue_ = queue
 
-def push_data_to_influx(data_point):
-    client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
-    client.write_data(data_point)
 
 if __name__ == "__main__":
     """
@@ -93,7 +90,8 @@ if __name__ == "__main__":
     counter_ = Value('i', 0)
     progress_ = Value('i', 0)
     startTime = datetime.now()
-    data_point = [{'measurement': 9, 'tags': {'commit_count': 1, 'storage_size': 41943, 'repository_size': 41943, 'lfs_objects_size': 0, 'job_artifacts_size': 0}, 'time': 1669002563, 'fields': {'project_id': 4}}]
+    data_point = [{'measurement': 19, 'tags': {'commit_count': 1, 'storage_size': 41943, 'repository_size': 41943, 'lfs_objects_size': 0, 'job_artifacts_size': 0}, 'time': 1669002563, 'fields': {'project_id': 4}}]
+    client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
 
     """
     Start writer as a new process
@@ -111,7 +109,7 @@ if __name__ == "__main__":
         """
         Write data into InfluxDB
         """
-        executor.submit(push_data_to_influx, data_point)
+        executor.submit(client.write_data, data_point)
 
     """
     Terminate Writer
