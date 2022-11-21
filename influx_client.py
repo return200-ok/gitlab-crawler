@@ -154,6 +154,8 @@ class InfluxClient:
         self.stop = stop
         delete_api.delete(start, stop, f'_measurement="{measurement}"', bucket=self._bucket, org=self._org)
 
+    def close_process(self):
+        self._client.close()
 
  
 # client = InfluxClient(influx_server, influx_token, org_name, bucket_name)

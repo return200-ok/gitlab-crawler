@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from influx_client import InfluxClient, InfluxPoint
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import ASYNCHRONOUS
+from multi_process import *
 
 import gitlab
 
@@ -176,35 +177,37 @@ def gen_datapoint(kpi_type, kpi_data, i):
         logging.warning("kpi_type is not matching!")
 
 
-def push_data(kpi_type, kpi_data):
-    if len(kpi_data) > 0: 
-        for i in range(0, len(kpi_data)):
-            with InfluxDBClient(url=influx_server, token=influx_token, org=org_name) as client: 
-                data_point = gen_datapoint(kpi_type, kpi_data, i)
-                try: 
-                    client.write_api(write_options=ASYNCHRONOUS).write(bucket_name, org_name, data_point)
-                    logging.info("Wrote "+str(data_point)+" to bucket "+bucket_name)
-                except Exception as e:
-                    logging.error("Problem inserting points for current batch")
-                    raise e
+# def push_data(kpi_type, kpi_data):
+#     if len(kpi_data) > 0: 
+#         for i in range(0, len(kpi_data)):
+#             with InfluxDBClient(url=influx_server, token=influx_token, org=org_name) as client: 
+#                 data_point = gen_datapoint(kpi_type, kpi_data, i)
+#                 try: 
+#                     client.write_api(write_options=ASYNCHRONOUS).write(bucket_name, org_name, data_point)
+#                     logging.info("Wrote "+str(data_point)+" to bucket "+bucket_name)
+#                 except Exception as e:
+#                     logging.error("Problem inserting points for current batch")
+#                     raise e
 
 def push_data_to_influx(kpi, data):
-    client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
     client.check_connection()
     client.check_write()
     if len(data) > 0:
         for i in range(0, len(data)):
             data_point = gen_datapoint(kpi, data, i)
             try:
-                client.write_data(data_point)
+                # client.write_data(data_point)
+                write_multiprocess(data_point)
                 logging.info("Wrote "+str(data_point)+" to bucket "+bucket_name)
             except Exception as e:
                 logging.error("Problem inserting points for current batch")
                 raise e
 
 if __name__ == '__main__':
+    client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
     projects = get_projects()
     kpis = ["mrs", "issue", "commit", "statistics"]
+    start_time = datetime.now()
     for kpi in kpis:
         if kpi == "mrs":
             for project in projects:
@@ -224,3 +227,7 @@ if __name__ == '__main__':
                 statistics.append(get_project_size(project))
                 push_data_to_influx(kpi, statistics)
 
+    print()
+    print(f'Import finished in: {datetime.now() - start_time}')
+    print()
+    client.close_process()

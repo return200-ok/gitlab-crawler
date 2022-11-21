@@ -1,8 +1,3 @@
-"""
-Import public NYC taxi and for-hire vehicle (Uber, Lyft, etc.) trip data into InfluxDB 2.0
-
-https://github.com/toddwschneider/nyc-taxi-data
-"""
 import concurrent.futures
 import io
 import multiprocessing
@@ -82,15 +77,13 @@ def init_counter(counter, progress, queue):
     queue_ = queue
 
 
-if __name__ == "__main__":
+def write_multiprocess(data_point):
     """
     Create multiprocess shared environment
     """
     queue_ = multiprocessing.Manager().Queue()
     counter_ = Value('i', 0)
     progress_ = Value('i', 0)
-    startTime = datetime.now()
-    data_point = [{'measurement': 19, 'tags': {'commit_count': 1, 'storage_size': 41943, 'repository_size': 41943, 'lfs_objects_size': 0, 'job_artifacts_size': 0}, 'time': 1669002563, 'fields': {'project_id': 4}}]
     client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
 
     """
@@ -117,9 +110,7 @@ if __name__ == "__main__":
     queue_.put(None)
     queue_.join()
 
-    print()
-    print(f'Import finished in: {datetime.now() - startTime}')
-    print()
+    
 
     # """
     # Querying 10 pickups from dispatching 'B00008'
