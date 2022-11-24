@@ -1,0 +1,9 @@
+#datatype dateTime:RFC3339,long,string,measurement,tag,tag
+_time,_value,_field,measurement,gitlab_project_id,gitlab_project_name
+2022-11-16T00:00:00Z,10,commit_total,commit_total,686,influx
+2022-11-17T00:00:00Z,20,commit_total,commit_total,686,influx
+2022-11-18T00:00:00Z,15,commit_total,commit_total,686,influx
+2022-11-19T00:00:00Z,3,commit_total,commit_total,686,influx
+2022-11-20T00:00:00Z,9,commit_total,commit_total,686,influx
+2022-11-21T00:00:00Z,16,commit_total,commit_total,686,influx
+2022-11-22T00:00:00Z,8,commit_total,commit_total,686,influx

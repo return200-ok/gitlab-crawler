@@ -1,0 +1,21 @@
+#datatype dateTime:RFC3339,long,string,measurement,tag,tag
+_time,_value,_field,measurement,sonarq_project_id,sonarq_project_name
+2022-11-16T00:00:00Z,50050,value,line_of_code,686,influx
+2022-11-17T00:00:00Z,4524,value,line_of_code,686,influx
+2022-11-20T00:00:00Z,24572,value,line_of_code,686,influx
+2022-11-17T00:00:00Z,245527,value,line_of_code,988,grafana
+2022-11-19T00:00:00Z,42540,value,line_of_code,988,grafana
+2022-11-20T00:00:00Z,345257,value,line_of_code,988,grafana
+2022-11-18T00:00:00Z,42542,value,line_of_code,222,mongo
+2022-11-10T00:00:00Z,24524,value,line_of_code,222,mongo
+2022-11-21T00:00:00Z,7872,value,line_of_code,222,mongo
+2022-11-19T00:00:00Z,2452,value,line_of_code,886,angular
+2022-11-20T00:00:00Z,24527,value,line_of_code,886,angular
+2022-11-22T00:00:00Z,248857,value,line_of_code,886,angular
+2022-11-20T00:00:00Z,4254,value,line_of_code,755,flask
+2022-11-22T00:00:00Z,2452,value,line_of_code,755,flask
+2022-11-21T00:00:00Z,4254,value,line_of_code,182,oracle
+2022-11-22T00:00:00Z,4257,value,line_of_code,182,oracle
+2022-11-21T00:00:00Z,4533,value,line_of_code,389,kubernetes
+2022-11-22T00:00:00Z,3737,value,line_of_code,389,kubernetes
+

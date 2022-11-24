@@ -1,0 +1,21 @@
+#datatype dateTime:RFC3339,boolean,string,measurement,tag,tag
+_time,_value,_field,measurement,sonarq_project_id,sonarq_project_name
+2022-11-16T00:00:00Z,true,value,quality_gate,686,influx
+2022-11-17T00:00:00Z,true,value,quality_gate,686,influx
+2022-11-20T00:00:00Z,true,value,quality_gate,686,influx
+2022-11-17T00:00:00Z,false,value,quality_gate,988,grafana
+2022-11-19T00:00:00Z,true,value,quality_gate,988,grafana
+2022-11-20T00:00:00Z,true,value,quality_gate,988,grafana
+2022-11-18T00:00:00Z,true,value,quality_gate,222,mongo
+2022-11-10T00:00:00Z,true,value,quality_gate,222,mongo
+2022-11-21T00:00:00Z,true,value,quality_gate,222,mongo
+2022-11-19T00:00:00Z,false,value,quality_gate,886,angular
+2022-11-20T00:00:00Z,true,value,quality_gate,886,angular
+2022-11-22T00:00:00Z,false,value,quality_gate,886,angular
+2022-11-20T00:00:00Z,true,value,quality_gate,755,flask
+2022-11-22T00:00:00Z,true,value,quality_gate,755,flask
+2022-11-21T00:00:00Z,true,value,quality_gate,182,oracle
+2022-11-22T00:00:00Z,true,value,quality_gate,182,oracle
+2022-11-21T00:00:00Z,false,value,quality_gate,389,kubernetes
+2022-11-22T00:00:00Z,false,value,quality_gate,389,kubernetes
+

@@ -1,0 +1,12 @@
+#datatype dateTime:RFC3339,long,string,measurement,tag,tag
+_time,_value,_field,measurement,sonarq_project_id,sonarq_project_name
+2022-11-20T00:00:00Z,10,blocker_violations,type_of_issue,686,influx
+2022-11-20T00:00:00Z,20,critical_violations,type_of_issue,686,influx
+2022-11-20T00:00:00Z,15,info_violations,type_of_issue,686,influx
+2022-11-20T00:00:00Z,3,major_violations,type_of_issue,686,influx
+2022-11-20T00:00:00Z,9,minor_violations,type_of_issue,686,influx
+2022-11-20T00:00:00Z,3,blocker_violations,type_of_issue,755,flask
+2022-11-20T00:00:00Z,20,critical_violations,type_of_issue,755,flask
+2022-11-20T00:00:00Z,15,info_violations,type_of_issue,755,flask
+2022-11-20T00:00:00Z,5,major_violations,type_of_issue,755,flask
+2022-11-20T00:00:00Z,20,minor_violations,type_of_issue,755,flask

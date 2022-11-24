@@ -1,0 +1,11 @@
+#datatype string,string,measurement,tag
+_value,_field,measurement,project_name
+686,project_id,project,influx
+988,project_id,project,grafana
+222,project_id,project,mongo
+886,project_id,project,angular
+755,project_id,project,flask
+182,project_id,project,oracle
+389,project_id,project,kubernetes
+
+

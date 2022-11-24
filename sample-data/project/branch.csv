@@ -1,0 +1,7 @@
+#datatype string,string,measurement,tag,tag
+_value,_field,measurement,project_id,project_name
+master,branch_name,branch,686,influx
+
+
+
+

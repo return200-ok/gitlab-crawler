@@ -1,0 +1,11 @@
+#datatype dateTime:RFC3339,long,string,measurement,tag,tag,tag
+_time,_value,_field,measurement,author_email,gitlab_project_id,gitlab_project_name
+2022-11-16T00:00:00Z,64972748,commit_id,commit,admin@example.com,686,influx
+2022-11-16T01:00:00Z,52739687,commit_id,commit,admin@example.com,686,influx
+2022-11-16T02:00:00Z,72727228,commit_id,commit,admin@example.com,686,influx
+2022-11-17T00:00:00Z,79872743,commit_id,commit,admin@example.com,686,influx
+2022-11-18T00:00:00Z,94988846,commit_id,commit,admin@example.com,686,influx
+2022-11-19T00:00:00Z,84912388,commit_id,commit,admin@example.com,686,influx
+2022-11-20T00:00:00Z,57874545,commit_id,commit,admin@example.com,686,influx
+2022-11-21T00:00:00Z,12487863,commit_id,commit,admin@example.com,686,influx
+2022-11-22T00:00:00Z,28964534,commit_id,commit,admin@example.com,686,influx

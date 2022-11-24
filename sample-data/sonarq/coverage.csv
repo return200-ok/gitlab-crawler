@@ -1,0 +1,22 @@
+#datatype dateTime:RFC3339,double,string,measurement,tag,tag
+_time,_value,_field,measurement,sonarq_project_id,sonarq_project_name
+2022-11-16T00:00:00Z,45,value,coverage,686,influx
+2022-11-17T00:00:00Z,68,value,coverage,686,influx
+2022-11-20T00:00:00Z,0,value,coverage,686,influx
+2022-11-21T00:00:00Z,22,value,coverage,686,influx
+2022-11-17T00:00:00Z,12,value,coverage,988,grafana
+2022-11-19T00:00:00Z,23,value,coverage,988,grafana
+2022-11-20T00:00:00Z,69,value,coverage,988,grafana
+2022-11-18T00:00:00Z,12,value,coverage,222,mongo
+2022-11-10T00:00:00Z,35.8,value,coverage,222,mongo
+2022-11-21T00:00:00Z,12,value,coverage,222,mongo
+2022-11-19T00:00:00Z,86,value,coverage,886,angular
+2022-11-20T00:00:00Z,87,value,coverage,886,angular
+2022-11-22T00:00:00Z,98,value,coverage,886,angular
+2022-11-20T00:00:00Z,0,value,coverage,755,flask
+2022-11-22T00:00:00Z,56,value,coverage,755,flask
+2022-11-21T00:00:00Z,45,value,coverage,182,oracle
+2022-11-22T00:00:00Z,25,value,coverage,182,oracle
+2022-11-21T00:00:00Z,68,value,coverage,389,kubernetes
+2022-11-22T00:00:00Z,0,value,coverage,389,kubernetes
+
