@@ -60,7 +60,7 @@ def init_counter(counter, progress, queue):
     queue_ = queue
 
 
-def write_multiprocess(data_point):
+def write_multiprocess(list_data_point):
     """
     Create multiprocess shared environment
     """
@@ -85,7 +85,10 @@ def write_multiprocess(data_point):
         """
         Write data into InfluxDB
         """
-        executor.submit(client.write_data, data_point)
+        # executor.submit(client.write_data, data_point)
+        for data_point in list_data_point:
+            queue_.put(data_point)
+            executor.submit(client.write_data, data_point)
 
     """
     Terminate Writer
