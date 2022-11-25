@@ -23,7 +23,7 @@ influx_server = os.getenv('INFLUX_DB')
 org_name = os.getenv('INFLUX_ORG')
 bucket_name = os.getenv('BUCKET_NAME')
 before_day = float(os.getenv('BEFORE_DAY'))
-
+logPath = os.getenv('LOG_PATH')
 
 '''
     Config logging handler
@@ -126,63 +126,64 @@ class Mrs:
 def gen_datapoint(kpi_type, kpi_data, i):
     if kpi_type == "mrs":
         data = Mrs(kpi_data[i].id, kpi_data[i].project_id, kpi_data[i].title, kpi_data[i].state, kpi_data[i].created_at, kpi_data[i].updated_at, kpi_data[i].target_branch, kpi_data[i].source_branch)
-        measurement = project.id
+        measurement = kpi_type
         tags = {
+            "project_id": project.id,
             "project_name": project.name,
-            "mrs_id": data.id,
-            "mrs_title": data.title,
-            "state": data.state,
-            "created_at": data.created_at,
-            "updated_at": data.updated_at,
             "target_branch": data.target_branch,
             "source_branch": data.source_branch,
             }
-        timestamp = int(time())
+        timestamp = data.created_at
         fields = {
-            "mrs_id": data.id
+            "mrs_id": data.id,
+            "mrs_title": data.title,
+            "state": data.state,
             }
         data_point = InfluxPoint(measurement, tags, fields, timestamp)._point
         return data_point
     elif kpi_type == "issue":
         data = Issues(kpi_data[i].id, kpi_data[i].project_id, kpi_data[i].title, kpi_data[i].state, kpi_data[i].created_at, kpi_data[i].updated_at)
-        measurement = project.id
+        measurement = kpi_type
         tags = {
+            "project_id": project.id,
             "project_name": project.name,
+            }
+        timestamp = data.created_at
+        fields = {
             "issue_id": data.id,
             "issue_title": data.title,
             "issue_state": data.state,
-            "created_at": data.created_at,
-            "updated_at": data.updated_at,
-            }
-        timestamp = int(time())
-        fields = {
-            "issue_id": data.id
             }
         data_point = InfluxPoint(measurement, tags, fields, timestamp)._point
         return data_point
     elif kpi_type == "commit":
         data = Commits(kpi_data[i].id, kpi_data[i].short_id, kpi_data[i].title, kpi_data[i].created_at, kpi_data[i].author_email)
-        measurement = project.id
+        measurement = kpi_type
         tags = {
+            "project_id": project.id,
             "project_name": project.name,
-            "commit_id": data.id,
-            "commit_title": data.title,
-            "created_at": data.created_at,
             "author_email": data.author_email,
             }
-        timestamp = int(time())
+        timestamp = data.created_at
         fields = {
-            "commit_id": data.short_id
+            "commit_id": data.short_id,
+            "commit_title": data.title,
             }
         data_point = InfluxPoint(measurement, tags, fields, timestamp)._point
         return data_point
     elif kpi_type == "statistics":
         data = Stats(kpi_data[i].statistics)
-        measurement = project.id
-        tags = data.statistics
+        measurement = kpi_type
+        tags = {
+            "project_id": project.id,
+            "project_name": project.name,
+        }
         timestamp = int(time())
         fields = {
-            "project_id": project.id
+            "storage_size": data.statistics['storage_size'],
+            "repository_size": data.statistics['repository_size'],
+            "lfs_objects_size": data.statistics['lfs_objects_size'],
+            "job_artifacts_size": data.statistics['job_artifacts_size'],
             }
         data_point = InfluxPoint(measurement, tags, fields, timestamp)._point
         return data_point
@@ -193,16 +194,43 @@ def gen_datapoint(kpi_type, kpi_data, i):
 def push_data(kpi, data):
     if len(data) > 0:
         for i in range(0, len(data)):
+            list_data_point = []
             data_point = gen_datapoint(kpi, data, i)
+            list_data_point.append(data_point)
             try:
-                write_multiprocess(data_point)
+                client.write_data(data_point)
+                # write_multiprocess(list_data_point)
                 logging.info("Wrote "+str(data_point)+" to bucket "+bucket_name)
             except Exception as e:
                 logging.error("Problem inserting points for current batch")
                 raise e
 
 if __name__ == '__main__':
-    client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
+    client = InfluxClient(influx_server, influx_token, org_name, "test")
+
+    # start_time = "2022-09-10T08:26:51.098Z" # type string: timestamp rfc3339
+    # stop_time = "2022-11-25T00:00:00.098Z"
+    # for measurement in ['branch']:
+    #     client.delete_data(start_time, stop_time, measurement)
+
+    # projects = get_projects()
+    # print(get_branches(projects[0])[0])
+
+    # data_point = [{
+    #     "measurement": "branch",
+    #     "tags": {
+    #         "project_name": "influx",
+    #         "project_id": "686",
+    #     },
+    #     "fields": {
+            
+    #         "branch_name": "master",
+    #         "branch_name": "develop",
+    #         "branch_name": "feature"
+    #     }
+    # }]
+    # client.write_data(data_point)
+
     '''Check connection & write'''
     client.check_connection()
     client.check_write()

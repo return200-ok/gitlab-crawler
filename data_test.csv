@@ -1,0 +1,142 @@
+B00001,2019-01-01 00:30:00,2019-01-01 02:51:55,,,
+B00001,2019-01-01 00:45:00,2019-01-01 00:54:49,,,
+B00001,2019-01-01 00:15:00,2019-01-01 00:54:52,,,
+B00008,2019-01-01 00:19:00,2019-01-01 00:39:00,,,
+B00008,2019-01-01 00:27:00,2019-01-01 00:37:00,,,
+B00008,2019-01-01 00:48:00,2019-01-01 01:02:00,,,
+B00008,2019-01-01 00:50:00,2019-01-01 00:59:00,,,
+B00008,2019-01-01 00:51:00,2019-01-01 00:56:00,,,
+B00009,2019-01-01 00:44:00,2019-01-01 00:58:00,,,
+B00009,2019-01-01 00:19:00,2019-01-01 00:36:00,,,
+B00009,2019-01-01 00:36:00,2019-01-01 00:49:00,,,
+B00009,2019-01-01 00:26:00,2019-01-01 00:32:00,,,
+
+points = [{
+    "measurement": "commit_total",
+    "tags": {
+        "project_id": "project_1",
+        "group": "fintech"
+    },
+    "time": "2022-11-15T23:00:00Z",
+    "fields": {
+        "Float_value": 0.7,
+        "Int_value": 8,
+        "String_value": "Text",
+        "Bool_value": False
+    }
+},
+{
+    "measurement": "commit_total",
+    "tags": {
+        "project_id": "project_1",
+        "group": "fintech"
+    },
+    "time": "2022-11-16T23:00:00Z",
+    "fields": {
+        "Float_value": 0.7,
+        "Int_value": 6,
+        "String_value": "Text",
+        "Bool_value": False
+    }
+},
+{
+    "measurement": "commit_total",
+    "tags": {
+        "project_id": "project_1",
+        "group": "fintech"
+    },
+    "time": "2022-11-17T23:00:00Z",
+    "fields": {
+        "Float_value": 0.7,
+        "Int_value": 10,
+        "String_value": "Text",
+        "Bool_value": False
+    }
+},
+{
+    "measurement": "commit_total",
+    "tags": {
+        "project_id": "project_1",
+        "group": "fintech"
+    },
+    "time": "2022-11-18T23:00:00Z",
+    "fields": {
+        "Float_value": 0.7,
+        "Int_value": 5,
+        "String_value": "Text",
+        "Bool_value": False
+    }
+},
+{
+    "measurement": "commit_total",
+    "tags": {
+        "project_id": "project_1",
+        "group": "fintech"
+    },
+    "time": "2022-11-19T23:00:00Z",
+    "fields": {
+        "Float_value": 0.7,
+        "Int_value": 6,
+        "String_value": "Text",
+        "Bool_value": False
+    }
+},
+{
+    "measurement": "commit_total",
+    "tags": {
+        "project_id": "project_1",
+        "group": "fintech"
+    },
+    "time": "2022-11-20T23:00:00Z",
+    "fields": {
+        "Float_value": 0.7,
+        "Int_value": 6,
+        "String_value": "Text",
+        "Bool_value": False
+    }
+},
+{
+    "measurement": "commit_total",
+    "tags": {
+        "project_id": "project_1",
+        "group": "fintech"
+    },
+    "time": "2022-11-21T23:00:00Z",
+    "fields": {
+        "Float_value": 1.0,
+        "Int_value": 2,
+        "String_value": "Text",
+        "Bool_value": False
+    }
+},
+{
+    "measurement": "commit_total",
+    "tags": {
+        "project_id": "project_1",
+        "group": "fintech"
+    },
+    "time": "2022-11-22T00:00:00Z",
+    "fields": {
+        "Float_value": 1.0,
+        "Int_value": 10,
+        "String_value": "Text",
+        "Bool_value": False
+    }
+},
+{
+    "measurement": "commit_total",
+    "tags": {
+        "project_id": "project_1",
+        "group": "fintech"
+    },
+    "time": "2022-11-22T00:00:00Z",
+    "fields": {
+        "Float_value": 1.0,
+        "Int_value": 10,
+        "String_value": "Text",
+        "Bool_value": False
+    }
+}
+]
+for i in points:
+    client.write_data(i)
