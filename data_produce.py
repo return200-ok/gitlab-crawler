@@ -20,6 +20,7 @@ for table in list_result:
     for record in table.records:
         results.append((record.get_value(), record.get_field()))
 print(results)
+
 # print(list_result)
 
 # def query_flux(unit, unique_id,
