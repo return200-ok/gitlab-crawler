@@ -21,6 +21,8 @@ for table in list_result:
         results.append((record.get_value(), record.get_field()))
 print(results)
 
+
+
 # print(list_result)
 
 # def query_flux(unit, unique_id,
