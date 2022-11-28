@@ -6,20 +6,41 @@ org_name = "org"
 bucket_name = "gitlab"
 client = InfluxDBClient(influx_server, influx_token, org_name)
 query = 'from(bucket: "test")\
-  |> range(start: -7d, stop: now())\
-  |> filter(fn: (r) => r["_measurement"] == "commit_total")'
+  |> range(start: -14d, stop: now())\
+  |> filter(fn: (r) => r["_measurement"] == "commit")'
+
+
+import json
+from influxdb_client.client.flux_table import FluxStructureEncoder
+list_result = client.query_api().query(org=org_name, query=query)
+output = json.dumps(list_result, cls=FluxStructureEncoder, indent=2)
+print(output[0])
+
 # def count_commit_per_day(query):
 #     client.check_query(query)
 #     list_result = client.query_response_to_json(query)
 #     return list_result
 # print(count_commit_per_day(query))
 # list_result = client.query_response_to_json(query)
-list_result = client.query_api().query(org=org_name, query=query)
-results = []
-for table in list_result:
-    for record in table.records:
-        results.append((record.get_value(), record.get_field()))
-print(results)
+# list_result = client.query_api().query(org=org_name, query=query)
+
+# Serialize to values
+# output = list_result.to_values(columns=['_measurement', '_time', '_value', 'gitlab_project_id'])
+# print(output)
+
+# Serialize to JSON
+# output = list_result.to_json(indent=5)
+# print(output[0])
+# for i in output:
+  # client.write_api().write(bucket_name, org_name, i)
+  # print(i)
+
+# results = []
+# for table in list_result:
+#     for record in table.records:
+#         # results.append((record.get_value(), record.get_field()))
+#         results.append((record.values))
+# print(results)
 
 
 

@@ -132,6 +132,7 @@ def gen_datapoint(kpi_type, kpi_data, i):
             "project_name": project.name,
             "target_branch": data.target_branch,
             "source_branch": data.source_branch,
+            "key": str(project.id)+"_"+str(data.id),
             }
         timestamp = data.created_at
         fields = {
@@ -147,6 +148,7 @@ def gen_datapoint(kpi_type, kpi_data, i):
         tags = {
             "project_id": project.id,
             "project_name": project.name,
+            "key": str(project.id)+"_"+str(data.id)
             }
         timestamp = data.created_at
         fields = {
@@ -163,6 +165,7 @@ def gen_datapoint(kpi_type, kpi_data, i):
             "project_id": project.id,
             "project_name": project.name,
             "author_email": data.author_email,
+            "key": str(project.id)+"_"+str(data.short_id)
             }
         timestamp = data.created_at
         fields = {
@@ -177,6 +180,7 @@ def gen_datapoint(kpi_type, kpi_data, i):
         tags = {
             "project_id": project.id,
             "project_name": project.name,
+            # "key": (project.id)+"_"+(data.id)
         }
         timestamp = int(time())
         fields = {
@@ -206,7 +210,7 @@ def push_data(kpi, data):
                 raise e
 
 if __name__ == '__main__':
-    client = InfluxClient(influx_server, influx_token, org_name, "test")
+    client = InfluxClient(influx_server, influx_token, org_name, "gitlab_test")
 
     # start_time = "2022-09-10T08:26:51.098Z" # type string: timestamp rfc3339
     # stop_time = "2022-11-25T00:00:00.098Z"
