@@ -34,7 +34,7 @@ from(bucket: "gitlab_test")\
   |> group(columns: ["project_id", "_time"], mode:"by")\
   |> count()'
 
-def data_support(query, measurement):
+def producer_data(query, measurement):
   result = query_client.query_to_json(query)
   for i in range(0, len(result)):
     entries_to_remove = ('result', 'table')
@@ -60,6 +60,6 @@ def data_support(query, measurement):
 
 if __name__ == '__main__':
     query_client = InfluxQueryClient(influx_server, influx_token, org_name, bucket_name, query_commit)
-    data_support(query_commit, "commit_total")
-    data_support(query_issue, "issue_total")
-    data_support(query_mrs, "mrs_total")
+    producer_data(query_commit, "commit_total")
+    producer_data(query_issue, "issue_total")
+    producer_data(query_mrs, "mrs_total")
