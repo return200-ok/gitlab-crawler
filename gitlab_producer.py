@@ -14,7 +14,9 @@ from query_client import InfluxQueryClient
 
 import gitlab
 
-# Load env
+'''
+  Load env
+'''
 load_dotenv()
 gl = gitlab.Gitlab(url=os.getenv('GITLAB_URL'), private_token=os.getenv('GITLAB_PRIVATE_TOKEN'))
 influx_token = os.getenv('INFLUX_TOKEN')
@@ -26,7 +28,7 @@ logPath = os.getenv('LOG_PATH')
 query_time = int(os.getenv('QUERY_TIME'))
 
 '''
-    Config logging handler
+  Config logging handler
 '''
 def get_date_string(date_object):
   return rfc3339.rfc3339(date_object)
@@ -38,8 +40,9 @@ logPath = "logs"
 fileName = get_date_string(datetime.now())+'_gitlab_producer'
 fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, fileName))
 fileHandler.setFormatter(logFormatter)
+
 '''
-Avoid duplicated logs
+  Avoid duplicated logs
 '''
 if (rootLogger.hasHandlers()):
     rootLogger.handlers.clear()
@@ -50,7 +53,9 @@ consoleHandler.setFormatter(logFormatter)
 rootLogger.addHandler(consoleHandler)
 logging.getLogger().setLevel(logging.DEBUG)
 
-
+'''
+  Query to count commit of a project each day
+'''
 query_commit = '''import "date"\
 from(bucket: "gitlab_test")\
   |> range(start: -30d, stop: now())\
@@ -60,6 +65,10 @@ from(bucket: "gitlab_test")\
   |> truncateTimeColumn(unit: 1d)\
   |> group(columns: ["project_id", "_time"], mode:"by")\
   |> count()'''
+
+'''
+  Query to count issue of a project each day
+'''
 query_issue = '''import "date"\
 from(bucket: "gitlab_test")\
   |> range(start: -30d, stop: now())\
@@ -69,6 +78,10 @@ from(bucket: "gitlab_test")\
   |> truncateTimeColumn(unit: 1d)\
   |> group(columns: ["project_id", "_time"], mode:"by")\
   |> count()'''
+
+'''
+  Query to count merge request of a project each day
+'''
 query_mrs = '''import "date"\
 from(bucket: "gitlab_test")\
   |> range(start: -30d, stop: now())\
@@ -78,6 +91,10 @@ from(bucket: "gitlab_test")\
   |> truncateTimeColumn(unit: 1d)\
   |> group(columns: ["project_id", "_time"], mode:"by")\
   |> count()'''
+
+'''
+  Query to get list project
+'''
 query_project = 'from(bucket: "gitlab_test")\
   |> range(start: -30d, stop: now())\
   |> filter(fn: (r) => r["_measurement"] == "project")'
@@ -85,6 +102,9 @@ query_project = 'from(bucket: "gitlab_test")\
 query_client = InfluxQueryClient(influx_server, influx_token, org_name, bucket_name, query_commit)
 write_client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
 
+'''
+  Get list project
+'''
 result = query_client.query_to_json(query_project)
 project_list = []
 for i in range(0, len(result)):
@@ -95,6 +115,9 @@ for i in range(0, len(result)):
   project_list.append(project_id)
 project_list = set(project_list)
 
+'''
+  Get list of day if result has value
+'''
 def get_value_by_day(time, result):
     res = None
     for sub in result:
@@ -104,25 +127,49 @@ def get_value_by_day(time, result):
             res = sub
             return res
 
+'''
+  Get time range to consumming data
+'''
 today = truncate(datetime.today(), 'day')
 time_range = []
 for day in range(0,(query_time-1)): 
     d = today - timedelta(days=day)
+    
+    '''
+      Convert time to rfc339 format
+    '''
     time_range.append(d.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
+'''
+  Producing data 
+'''
 def producer_data(query, measurement):
   for project in project_list:
+    
+    '''
+      Generate query with project ID
+    '''
     q = query.format(id=project)
     res = query_client.query_to_json(q)
 
     days_has_value = []
     for i in range(0, len(res)):
-        time = res[i]['_time']
+        time = res[i]['_time']        
+        '''
+          Convert time to rfc339 format
+        '''
         time = dt.datetime.strptime(time[0:19],"%Y-%m-%dT%H:%M:%S").strftime('%Y-%m-%dT%H:%M:%SZ')
         days_has_value.append(time)
 
-    for t in time_range:
+    for t in time_range:        
+        '''
+          Default value = 0
+        '''
         value = 0
+        
+        '''
+          If days has a value then get value from result
+        '''
         if t in days_has_value:
             r = get_value_by_day(t, res)
             value = r['_value']
@@ -136,6 +183,10 @@ def producer_data(query, measurement):
                 "value": value,
             }
         }]
+        
+        '''
+          Write record to bucket
+        '''
         try:
             write_client.write_data(record)
             logging.info("Wrote "+str(record)+" to bucket "+bucket_name)
@@ -144,6 +195,10 @@ def producer_data(query, measurement):
             raise e
 
 if __name__ == '__main__':
+
+  '''
+    Start process
+  '''
   start_time = datetime.now()
   producer_data(query_commit, "commit_total")
   producer_data(query_issue, "issue_total")
