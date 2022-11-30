@@ -8,3 +8,4 @@ from(bucket: "gitlab_test")\
   |> group(columns: ["project_id", "_time"], mode:"by")\
   |> count()'''
 print(query.format(id=5))    
+

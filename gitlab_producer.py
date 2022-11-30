@@ -1,16 +1,54 @@
 import datetime as dt
-import json
-from datetime import date, datetime, timedelta
+import logging
+import os
+import sys
+from datetime import datetime, timedelta
+from os import environ
+from time import time
 
+import rfc3339
 from datetime_truncate import truncate
+from dotenv import load_dotenv
 from influx_client import InfluxClient
-from influxdb_client.client.write_api import SYNCHRONOUS
 from query_client import InfluxQueryClient
 
-influx_token = "KlXfBqa0uSGs0icfE-3g8FsQAoC9hx_QeDsxE3pn0p9wWWLn0bzDZdSmrOijoTA_Tr2MGPnF-LxZl-Nje8YJGQ=="
-influx_server = "http://192.168.3.101:8086"
-org_name = "org"
-bucket_name = "gitlab_test"
+import gitlab
+
+# Load env
+load_dotenv()
+gl = gitlab.Gitlab(url=os.getenv('GITLAB_URL'), private_token=os.getenv('GITLAB_PRIVATE_TOKEN'))
+influx_token = os.getenv('INFLUX_TOKEN')
+influx_server = os.getenv('INFLUX_DB')
+org_name = os.getenv('INFLUX_ORG')
+bucket_name = os.getenv('BUCKET_NAME')
+before_day = float(os.getenv('BEFORE_DAY'))
+logPath = os.getenv('LOG_PATH')
+query_time = os.getenv('QUERY_TIME')
+
+'''
+    Config logging handler
+'''
+def get_date_string(date_object):
+  return rfc3339.rfc3339(date_object)
+
+duration_time = datetime.now() - timedelta(before_day)
+logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+rootLogger = logging.getLogger()
+logPath = "logs"
+fileName = get_date_string(datetime.now())+'_gitlab_producer'
+fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, fileName))
+fileHandler.setFormatter(logFormatter)
+'''
+Avoid duplicated logs
+'''
+if (rootLogger.hasHandlers()):
+    rootLogger.handlers.clear()
+rootLogger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler(sys.stdout)
+consoleHandler.setFormatter(logFormatter)
+rootLogger.addHandler(consoleHandler)
+logging.getLogger().setLevel(logging.DEBUG)
 
 
 query_commit = '''import "date"\
@@ -45,6 +83,7 @@ query_project = 'from(bucket: "gitlab_test")\
   |> filter(fn: (r) => r["_measurement"] == "project")'
 
 query_client = InfluxQueryClient(influx_server, influx_token, org_name, bucket_name, query_commit)
+write_client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
 
 result = query_client.query_to_json(query_project)
 project_list = []
@@ -67,7 +106,7 @@ def get_value_by_day(time, result):
 
 today = truncate(datetime.today(), 'day')
 time_range = []
-for day in range(0,29): 
+for day in range(0,(query_time-1)): 
     d = today - timedelta(days=day)
     time_range.append(d.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
@@ -97,8 +136,8 @@ def producer_data(query, measurement):
                 "value": value,
             }
         }]
-        print(record)
-        # client.write_data(record)
+        # print(record)
+        write_client.write_data(record)
 
 if __name__ == '__main__':
   producer_data(query_commit, "commit_total")
