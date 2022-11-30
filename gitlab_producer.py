@@ -23,7 +23,7 @@ org_name = os.getenv('INFLUX_ORG')
 bucket_name = os.getenv('BUCKET_NAME')
 before_day = float(os.getenv('BEFORE_DAY'))
 logPath = os.getenv('LOG_PATH')
-query_time = os.getenv('QUERY_TIME')
+query_time = int(os.getenv('QUERY_TIME'))
 
 '''
     Config logging handler
@@ -136,12 +136,19 @@ def producer_data(query, measurement):
                 "value": value,
             }
         }]
-        # print(record)
-        write_client.write_data(record)
+        try:
+            write_client.write_data(record)
+            logging.info("Wrote "+str(record)+" to bucket "+bucket_name)
+        except Exception as e:
+            logging.error("Problem inserting points for current batch")
+            raise e
 
 if __name__ == '__main__':
+  start_time = datetime.now()
   producer_data(query_commit, "commit_total")
   producer_data(query_issue, "issue_total")
   producer_data(query_mrs, "mrs_total")
-      
-
+  print()
+  logging.info(f'Import data finished in: {datetime.now() - start_time}')
+  print()
+  write_client.close_process()
