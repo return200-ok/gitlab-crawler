@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class InfluxPoint:
     
     """Initialize defaults."""
-    def __init__(self, measurement, tags, fields, timestamp):
+    def __init__(self, measurement, tags, fields, timestamp=None):
         self.measurement = measurement
         self.tags = tags
         self.fields = fields

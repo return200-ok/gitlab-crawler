@@ -1,0 +1,5 @@
+2022-11-30 10:16:00,435 [MainThread  ] [INFO ]  Wrote [{'measurement': 'project', 'tags': {'project_name': 'd'}, 'time': None, 'fields': {'project_id': 4}}] to bucket gitlab
+2022-11-30 10:16:00,468 [MainThread  ] [INFO ]  Wrote [{'measurement': 'project', 'tags': {'project_name': 'c'}, 'time': None, 'fields': {'project_id': 3}}] to bucket gitlab
+2022-11-30 10:16:00,553 [MainThread  ] [INFO ]  Wrote [{'measurement': 'project', 'tags': {'project_name': 'b'}, 'time': None, 'fields': {'project_id': 2}}] to bucket gitlab
+2022-11-30 10:16:00,574 [MainThread  ] [INFO ]  Wrote [{'measurement': 'project', 'tags': {'project_name': 'a'}, 'time': None, 'fields': {'project_id': 1}}] to bucket gitlab
+2022-11-30 10:16:01,180 [MainThread  ] [INFO ]  Import finished in: 0:00:00.604339

@@ -124,7 +124,29 @@ class Mrs:
 
 #Gen data point
 def gen_datapoint(kpi_type, kpi_data, i):
-    if kpi_type == "mrs":
+    if kpi_type == "project":
+        measurement = kpi_type
+        tags = {
+            "project_name": kpi_data[i].name,
+            }
+        fields = {
+            "project_id": kpi_data[i].id,
+            }
+        data_point = InfluxPoint(measurement, tags, fields)._point
+        return data_point
+    elif kpi_type == "branch":
+        measurement = kpi_type
+        tags = {
+            "project_id": project.id,
+            "project_name": project.name,
+            "key": str(project.id)+"_"+str(kpi_data[i].name),
+            }
+        fields = {
+            "branch": kpi_data[i].name,
+            }
+        data_point = InfluxPoint(measurement, tags, fields)._point
+        return data_point
+    elif kpi_type == "mrs":
         data = Mrs(kpi_data[i].id, kpi_data[i].project_id, kpi_data[i].title, kpi_data[i].state, kpi_data[i].created_at, kpi_data[i].updated_at, kpi_data[i].target_branch, kpi_data[i].source_branch)
         measurement = kpi_type
         tags = {
@@ -197,8 +219,8 @@ def gen_datapoint(kpi_type, kpi_data, i):
 
 def push_data(kpi, data):
     if len(data) > 0:
+        list_data_point = []
         for i in range(0, len(data)):
-            list_data_point = []
             data_point = gen_datapoint(kpi, data, i)
             list_data_point.append(data_point)
             try:
@@ -212,38 +234,20 @@ def push_data(kpi, data):
 if __name__ == '__main__':
     client = InfluxClient(influx_server, influx_token, org_name, "gitlab_test")
 
-    # start_time = "2022-09-10T08:26:51.098Z" # type string: timestamp rfc3339
-    # stop_time = "2022-11-25T00:00:00.098Z"
-    # for measurement in ['branch']:
-    #     client.delete_data(start_time, stop_time, measurement)
-
-    # projects = get_projects()
-    # print(get_branches(projects[0])[0])
-
-    # data_point = [{
-    #     "measurement": "branch",
-    #     "tags": {
-    #         "project_name": "influx",
-    #         "project_id": "686",
-    #     },
-    #     "fields": {
-            
-    #         "branch_name": "master",
-    #         "branch_name": "develop",
-    #         "branch_name": "feature"
-    #     }
-    # }]
-    # client.write_data(data_point)
-
     '''Check connection & write'''
     client.check_connection()
     client.check_write()
     '''Get list project & kpis'''
     projects = get_projects()
-    kpis = ["mrs", "issue", "commit", "statistics"]
+    push_data("project", projects)
+    kpis = ["project", "branch", "mrs", "issue", "commit", "statistics"]
     start_time = datetime.now()
     for kpi in kpis:
-        if kpi == "mrs":
+        if kpi == "branch":
+            for project in projects:
+                branch = get_branches(project)
+                push_data(kpi, branch)
+        elif kpi == "mrs":
             for project in projects:
                 mrs = get_mrs(project)
                 push_data(kpi, mrs)
