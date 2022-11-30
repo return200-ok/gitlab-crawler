@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import sys
@@ -9,14 +8,12 @@ from time import time
 import rfc3339
 from dotenv import load_dotenv
 from influx_client import InfluxClient, InfluxPoint
-from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import ASYNCHRONOUS
-from multi_process import *
 
 import gitlab
 
 '''
-Load env
+    Load env
 '''
 load_dotenv()
 gl = gitlab.Gitlab(url=os.getenv('GITLAB_URL'), private_token=os.getenv('GITLAB_PRIVATE_TOKEN'))
@@ -25,7 +22,7 @@ influx_server = os.getenv('INFLUX_DB')
 org_name = os.getenv('INFLUX_ORG')
 bucket_name = os.getenv('BUCKET_NAME')
 before_day = float(os.getenv('BEFORE_DAY'))
-logPath = os.getenv('LOG_PATH')
+logPath = os.getenv('COLLECTOR_LOG_PATH')
 
 '''
 Config logging handler
@@ -36,7 +33,6 @@ def get_date_string(date_object):
 duration_time = datetime.now() - timedelta(before_day)
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 rootLogger = logging.getLogger()
-logPath = "logs"
 fileName = get_date_string(datetime.now())+'_gitlab_collecter'
 fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, fileName))
 fileHandler.setFormatter(logFormatter)

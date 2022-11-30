@@ -24,7 +24,7 @@ influx_server = os.getenv('INFLUX_DB')
 org_name = os.getenv('INFLUX_ORG')
 bucket_name = os.getenv('BUCKET_NAME')
 before_day = float(os.getenv('BEFORE_DAY'))
-logPath = os.getenv('LOG_PATH')
+logPath = os.getenv('PRODUCER_LOG_PATH')
 query_time = int(os.getenv('QUERY_TIME'))
 
 '''
@@ -36,7 +36,6 @@ def get_date_string(date_object):
 duration_time = datetime.now() - timedelta(before_day)
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 rootLogger = logging.getLogger()
-logPath = "logs"
 fileName = get_date_string(datetime.now())+'_gitlab_producer'
 fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, fileName))
 fileHandler.setFormatter(logFormatter)

@@ -1,10 +1,7 @@
-import datetime
 import logging
-import os
-from datetime import datetime, timedelta
 from time import time
 
-from influxdb_client import Dialect, InfluxDBClient, Point
+from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import ASYNCHRONOUS, SYNCHRONOUS
 from influxdb_client.rest import ApiException
 
@@ -112,33 +109,6 @@ class InfluxClient:
         write_api = self._client.write_api(write_option)
         write_api.write(self._bucket, self._org, data, write_precision='s')
     
-    '''
-    Method called query_data used to read data 
-    Example:
-        query = 'from(bucket: "test") |> range(start: -1h)'
-        client.query_data(query)
-    '''
-    def query_data(self, query):
-        query_api = self._client.query_api()
-        result = query_api.query(org=self._org, query=query)
-        results = []
-        for table in result:
-            for record in table.records:
-                results.append((record.get_value(), record.get_field()))
-        return results 
-    
-    '''
-    Query data 
-    Serialize to JSON
-    ''' 
-    def query_response_to_json(self, query):
-        query_api = self._client.query_api()
-        result = query_api.query(org=self._org, query=query)
-        results = []
-        for table in result:
-            for record in table.records:
-                results.append((record.values))
-        return results 
     
     '''
     Method called delete_data used to delete data 
