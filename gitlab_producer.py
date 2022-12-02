@@ -53,52 +53,13 @@ rootLogger.addHandler(consoleHandler)
 logging.getLogger().setLevel(logging.DEBUG)
 
 '''
-  Query to count commit of a project each day
-'''
-query_commit = '''import "date"\
-from(bucket: "gitlab_test")\
-  |> range(start: -30d, stop: now())\
-  |> filter(fn: (r) => r["_measurement"] == "commit")\
-  |> filter(fn: (r) => r["project_id"] == "{id}")\
-  |> filter(fn: (r) => r["_field"] == "commit_id")\
-  |> truncateTimeColumn(unit: 1d)\
-  |> group(columns: ["project_id", "_time"], mode:"by")\
-  |> count()'''
-
-'''
-  Query to count issue of a project each day
-'''
-query_issue = '''import "date"\
-from(bucket: "gitlab_test")\
-  |> range(start: -30d, stop: now())\
-  |> filter(fn: (r) => r["_measurement"] == "issue")\
-  |> filter(fn: (r) => r["project_id"] == "{id}")\
-  |> filter(fn: (r) => r["_field"] == "issue_id")\
-  |> truncateTimeColumn(unit: 1d)\
-  |> group(columns: ["project_id", "_time"], mode:"by")\
-  |> count()'''
-
-'''
-  Query to count merge request of a project each day
-'''
-query_mrs = '''import "date"\
-from(bucket: "gitlab_test")\
-  |> range(start: -30d, stop: now())\
-  |> filter(fn: (r) => r["_measurement"] == "mrs")\
-  |> filter(fn: (r) => r["project_id"] == "{id}")\
-  |> filter(fn: (r) => r["_field"] == "mrs_id")\
-  |> truncateTimeColumn(unit: 1d)\
-  |> group(columns: ["project_id", "_time"], mode:"by")\
-  |> count()'''
-
-'''
   Query to get list project
 '''
 query_project = 'from(bucket: "gitlab_test")\
   |> range(start: -30d, stop: now())\
   |> filter(fn: (r) => r["_measurement"] == "project")'
 
-query_client = InfluxQueryClient(influx_server, influx_token, org_name, bucket_name, query_commit)
+query_client = InfluxQueryClient(influx_server, influx_token, org_name, bucket_name, "")
 write_client = InfluxClient(influx_server, influx_token, org_name, bucket_name)
 
 '''
@@ -182,7 +143,7 @@ def producer_data(query, measurement):
                 "value": value,
             }
         }]
-        
+
         '''
           Write record to bucket
         '''
@@ -192,16 +153,65 @@ def producer_data(query, measurement):
         except Exception as e:
             logging.error("Problem inserting points for current batch")
             raise e
-
 if __name__ == '__main__':
 
   '''
     Start process
   '''
   start_time = datetime.now()
-  producer_data(query_commit, "commit_total")
-  producer_data(query_issue, "issue_total")
-  producer_data(query_mrs, "mrs_total")
+
+  def consum_commit():
+
+    '''
+      Query to count commit of a project each day
+    '''
+    query_commit = '''import "date"\
+    from(bucket: "gitlab_test")\
+      |> range(start: -30d, stop: now())\
+      |> filter(fn: (r) => r["_measurement"] == "commit")\
+      |> filter(fn: (r) => r["project_id"] == "{id}")\
+      |> filter(fn: (r) => r["_field"] == "commit_id")\
+      |> truncateTimeColumn(unit: 1d)\
+      |> group(columns: ["project_id", "_time"], mode:"by")\
+      |> count()'''
+    producer_data(query_commit, "commit_total")
+
+  def consum_issue():
+
+    '''
+      Query to count issue of a project each day
+    '''
+    query_issue = '''import "date"\
+    from(bucket: "gitlab_test")\
+      |> range(start: -30d, stop: now())\
+      |> filter(fn: (r) => r["_measurement"] == "issue")\
+      |> filter(fn: (r) => r["project_id"] == "{id}")\
+      |> filter(fn: (r) => r["_field"] == "issue_id")\
+      |> truncateTimeColumn(unit: 1d)\
+      |> group(columns: ["project_id", "_time"], mode:"by")\
+      |> count()'''
+    producer_data(query_issue, "issue_total")
+
+  def consum_mrs():
+
+    '''
+      Query to count merge request of a project each day
+    '''
+    query_mrs = '''import "date"\
+    from(bucket: "gitlab_test")\
+      |> range(start: -30d, stop: now())\
+      |> filter(fn: (r) => r["_measurement"] == "mrs")\
+      |> filter(fn: (r) => r["project_id"] == "{id}")\
+      |> filter(fn: (r) => r["_field"] == "mrs_id")\
+      |> truncateTimeColumn(unit: 1d)\
+      |> group(columns: ["project_id", "_time"], mode:"by")\
+      |> count()'''
+    producer_data(query_mrs, "mrs_total")
+  
+  consum_commit()
+  consum_issue()
+  consum_mrs()
+
   print()
   logging.info(f'Import data finished in: {datetime.now() - start_time}')
   print()
