@@ -7,8 +7,8 @@ from time import time
 
 import rfc3339
 from dotenv import load_dotenv
-from influx_client import InfluxClient, InfluxPoint
 from influxdb_client.client.write_api import ASYNCHRONOUS
+from lib.influx_client import InfluxClient, InfluxPoint
 
 import gitlab
 
@@ -16,7 +16,9 @@ import gitlab
     Load env
 '''
 load_dotenv()
-gl = gitlab.Gitlab(url=os.getenv('GITLAB_URL'), private_token=os.getenv('GITLAB_PRIVATE_TOKEN'))
+gitlab_url = os.getenv('GITLAB_URL')
+gitlab_token = os.getenv('GITLAB_PRIVATE_TOKEN')
+gl = gitlab.Gitlab(url=gitlab_url, private_token=gitlab_token)
 influx_token = os.getenv('INFLUX_TOKEN')
 influx_server = os.getenv('INFLUX_DB')
 org_name = os.getenv('INFLUX_ORG')

@@ -9,8 +9,8 @@ from time import time
 import rfc3339
 from datetime_truncate import truncate
 from dotenv import load_dotenv
-from influx_client import InfluxClient
-from query_client import InfluxQueryClient
+from lib.influx_client import InfluxClient
+from lib.query_client import InfluxQueryClient
 
 import gitlab
 
@@ -18,7 +18,9 @@ import gitlab
   Load env
 '''
 load_dotenv()
-gl = gitlab.Gitlab(url=os.getenv('GITLAB_URL'), private_token=os.getenv('GITLAB_PRIVATE_TOKEN'))
+gitlab_url = os.getenv('GITLAB_URL')
+gitlab_token = os.getenv('GITLAB_PRIVATE_TOKEN')
+gl = gitlab.Gitlab(url=gitlab_url, private_token=gitlab_token)
 influx_token = os.getenv('INFLUX_TOKEN')
 influx_server = os.getenv('INFLUX_DB')
 org_name = os.getenv('INFLUX_ORG')

@@ -128,9 +128,9 @@ class InfluxClient:
 
  
 # start_time = "2022-11-01T00:00:00.000Z" # type string: timestamp rfc3339
-# stop_time = "2022-12-03T00:00:00.000Z"
+# stop_time = "2022-12-08T00:00:00.000Z"
 # client = InfluxClient("http://192.168.3.101:8086", "KlXfBqa0uSGs0icfE-3g8FsQAoC9hx_QeDsxE3pn0p9wWWLn0bzDZdSmrOijoTA_Tr2MGPnF-LxZl-Nje8YJGQ==", "org", "gitlab_test")
-# client.delete_data(start_time, stop_time, "branch")
+# client.delete_data(start_time, stop_time, "project")
 
 
 
