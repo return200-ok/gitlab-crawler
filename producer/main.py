@@ -6,13 +6,12 @@ from datetime import datetime, timedelta
 from os import environ
 from time import time
 
+import gitlab
 import rfc3339
 from datetime_truncate import truncate
 from dotenv import load_dotenv
 from lib.influx_client import InfluxClient
 from lib.query_client import InfluxQueryClient
-
-import gitlab
 
 '''
   Load env
