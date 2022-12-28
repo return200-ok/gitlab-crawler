@@ -1,0 +1,482 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFLUXDB",
+      "label": "InfluxDB",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__elements": [],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.0.1"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1672196357943,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket: \"gitlab_test\")\n  |> range(start: -30d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"statistics\")\n  |> filter(fn: (r) => r[\"project_id\"] == \"1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"repository_size\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Repository size",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket: \"gitlab_test\")\n  |> range(start: -30d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"issue_total\")\n  |> filter(fn: (r) => r[\"project_id\"] == \"${Project_key}\")\n",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "hide": false,
+          "query": "import \"date\"\nfrom(bucket: \"gitlab\")\n  |> range(start: -7d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"issue_id\")\n  |> unique(column: \"issue_id\")\n  |> map(fn:(r) => ({r with \"created_at\": time(v: r[\"created_at\"])}))\n  |> filter(fn: (r) => r[\"created_at\"] < date.sub(d: 7d, from: now()))\n  |> group()  \n  |> count()\n  |> map(fn: (r) => ({ \"7 days ago\": r._value}) )",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "hide": false,
+          "query": "import \"date\"\nfrom(bucket: \"gitlab\")\n  |> range(start: -10d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"issue_id\")\n  |> unique(column: \"issue_id\")\n  |> map(fn:(r) => ({r with \"created_at\": time(v: r[\"created_at\"])}))\n  |> filter(fn: (r) => r[\"created_at\"] < date.sub(d: 10d, from: now()))\n  |> group()  \n  |> count()\n  |> map(fn: (r) => ({ \"10 days ago\": r._value}) )",
+          "refId": "C"
+        }
+      ],
+      "title": "Issue total",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket: \"gitlab_test\")\n  |> range(start: -30d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"commit_total\")\n  |> filter(fn: (r) => r[\"project_id\"] == \"${Project_key}\")\n",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "hide": false,
+          "query": "import \"date\"\nfrom(bucket: \"gitlab\")\n  |> range(start: -7d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"commit_id\")\n  |> unique(column: \"commit_id\")\n  |> map(fn:(r) => ({r with \"created_at\": time(v: r[\"created_at\"])}))\n  |> filter(fn: (r) => r[\"created_at\"] < date.sub(d: 7d, from: now()))\n  |> group()  \n  |> count()\n  |> map(fn: (r) => ({ \"7 days ago\": r._value}) )",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "hide": false,
+          "query": "import \"date\"\nfrom(bucket: \"gitlab\")\n  |> range(start: -10d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"commit_id\")\n  |> unique(column: \"commit_id\")\n  |> map(fn:(r) => ({r with \"created_at\": time(v: r[\"created_at\"])}))\n  |> filter(fn: (r) => r[\"created_at\"] < date.sub(d: 10d, from: now()))\n  |> group()  \n  |> count()\n  |> map(fn: (r) => ({ \"10 days ago\": r._value}) )",
+          "refId": "C"
+        }
+      ],
+      "title": "Commit total",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 100,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "query": "from(bucket: \"gitlab_test\")\n  |> range(start: -30d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mrs_total\")\n  |> filter(fn: (r) => r[\"project_id\"] == \"${Project_key}\")\n",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "hide": false,
+          "query": "import \"date\"\nfrom(bucket: \"gitlab\")\n  |> range(start: -7d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"mrs_id\")\n  |> unique(column: \"mrs_id\")\n  |> map(fn:(r) => ({r with \"created_at\": time(v: r[\"created_at\"])}))\n  |> filter(fn: (r) => r[\"created_at\"] < date.sub(d: 7d, from: now()))\n  |> group()  \n  |> count()\n  |> map(fn: (r) => ({ \"7 days ago\": r._value}) )",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${DS_INFLUXDB}"
+          },
+          "hide": false,
+          "query": "import \"date\"\nfrom(bucket: \"gitlab\")\n  |> range(start: -10d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"1\")\n  |> filter(fn: (r) => r[\"_field\"] == \"mrs_id\")\n  |> unique(column: \"mrs_id\")\n  |> map(fn:(r) => ({r with \"created_at\": time(v: r[\"created_at\"])}))\n  |> filter(fn: (r) => r[\"created_at\"] < date.sub(d: 10d, from: now()))\n  |> group()  \n  |> count()\n  |> map(fn: (r) => ({ \"10 days ago\": r._value}) )",
+          "refId": "C"
+        }
+      ],
+      "title": "Merge Request total",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${DS_INFLUXDB}"
+        },
+        "definition": "from(bucket: \"gitlab_test\")\n  |> range(start: -30d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"project\")\n  |> keep(columns: [\"_value\"])",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Project_key",
+        "multi": false,
+        "name": "Project_key",
+        "options": [],
+        "query": "from(bucket: \"gitlab_test\")\n  |> range(start: -30d, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"project\")\n  |> keep(columns: [\"_value\"])",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Gitlab-KPI",
+  "uid": "BAGFPbv4k",
+  "version": 10,
+  "weekStart": ""
+}
